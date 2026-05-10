@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>背经每日打卡</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:微软雅黑,sans-serif;}
+body{background:#f5f5f5;padding:15px;color:#333;}
+.container{max-width:500px;margin:0 auto;background:#fff;padding:20px;border-radius:8px;}
+h2{text-align:center;margin-bottom:20px;font-weight:normal;}
+.stat{background:#f0f0f0;padding:15px;border-radius:6px;margin-bottom:20px;}
+.stat p{margin:8px 0;font-size:16px;}
+.tab{display:flex;gap:5px;margin:15px 0;}
+.tab button{flex:1;padding:10px;margin:0;background:#eee;color:#333;border-radius:4px;border:none;}
+.tab button.active{background:#444;color:#fff;}
+input{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:4px;font-size:15px;}
+button{width:100%;padding:13px;background:#444;color:#fff;border:none;border-radius:4px;font-size:16px;margin:10px 0;}
+.btn-gray{background:#666;}
+.title{margin:25px 0 10px 0;font-size:17px;border-left:4px solid #444;padding-left:10px;}
+.list{background:#fafafa;padding:10px;border-radius:4px;min-height:60px;}
+.item{padding:8px;border-bottom:1px solid #eee;font-size:14px;}
+.empty{color:#999;text-align:center;padding:15px;}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>背经每日打卡</h2>
+<div class="stat">
+<p>总需打卡人数：<span id="totalNum">18</span> 人</p>
+<p>当日已打卡：<span id="todayDone">0</span> 人</p>
+<p>当日未打卡：<span id="todayUndo">18</span> 人</p>
+</div>
+<div class="tab">
+<button onclick="switchDay(0)" id="tab0" class="active">今天</button>
+<button onclick="switchDay(1)" id="tab1">昨天</button>
+<button onclick="switchDay(2)" id="tab2">前天</button>
+<button onclick="switchDay(3)" id="tab3">3天前</button>
+</div>
+<input type="text" id="userName" placeholder="请输入姓名">
+<input type="text" id="bookName" placeholder="经文名称（可不填）">
+<input type="text" id="chapter" placeholder="请输入读到章节">
+<button onclick="addTodayClock()">今日正常打卡</button>
+<button onclick="addBackClock()" class="btn-gray">补签过往日期</button>
+<div class="title">对应日期打卡记录</div>
+<div class="list" id="dayCheckList"></div>
+<div class="title">所有补签记录</div>
+<div class="list" id="backList"></div>
+<div class="title">对应日期未打卡人员</div>
+<div class="list" id="undoList"></div>
+</div>
+<script>
+const ALL_NAMES=["吴淑文","李晨星","杜国鹏","赵恩琳","孙龙昊","陈媛煜","余乃斌","张梦涵","李雯璐","李芳","刘琛","缪梓烨","家恩","范大宇","李宇乐","zhu","张瀚","王文俊"];
+const TOTAL=ALL_NAMES.length;let nowDayIndex=0;
+const KEY_HISTORY='read_clock_history';const KEY_BACK='read_clock_back';
+function getOffsetDate(offset){let d=new Date();d.setDate(d.getDate()-offset);return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;}
+function initHistory(){let h=JSON.parse(localStorage.getItem(KEY_HISTORY)||'{}');for(let i=0;i<=3;i++){let d=getOffsetDate(i);if(!h[d])h[d]=[];}localStorage.setItem(KEY_HISTORY,JSON.stringify(h));if(!localStorage.getItem(KEY_BACK))localStorage.setItem(KEY_BACK,'[]');}
+function switchDay(i){nowDayIndex=i;for(let j=0;j<=3;j++)document.getElementById('tab'+j).className=j===i?'active':'';render();}
+function addTodayClock(){let n=document.getElementById('userName').value.trim();let b=document.getElementById('bookName').value.trim();let c=document.getElementById('chapter').value.trim();if(!n||!c){alert('姓名和章节必须填写');return;}if(!ALL_NAMES.includes(n)){alert('姓名不在名单里');return;}let t=new Date();let s=`${t.getFullYear()}-${t.getMonth()+1}-${t.getDate()} ${t.getHours()}:${t.getMinutes()}`;let d=getOffsetDate(0);let h=JSON.parse(localStorage.getItem(KEY_HISTORY));if(h[d].some(x=>x.name===n)){alert('今日已打卡');return;}h[d].push({name:n,book:b,chap:c,time:s,date:d});
